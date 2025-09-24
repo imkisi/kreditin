@@ -8,11 +8,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun DatabaseScreen() {
+fun PaymentScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Database Screen")
+        Text(text = "Payment Screen")
     }
 }

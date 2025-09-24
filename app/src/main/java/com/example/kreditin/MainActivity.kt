@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Pageview
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -42,11 +42,11 @@ enum class Destination(
         label = "Home",
         contentDescription = "Navigate to Home"
     ),
-    DATABASE(
-        route = "database",
-        icon = Icons.Filled.Storage,
-        label = "Database",
-        contentDescription = "Navigate to Database"
+    PAYMENT(
+        route = "payment",
+        icon = Icons.Filled.Payments,
+        label = "Payment",
+        contentDescription = "Navigate to Payment"
     ),
     ABOUT(
         route = "about",
@@ -68,7 +68,7 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(Destination.HOME.route) { HomeScreen() }
-        composable(Destination.DATABASE.route) { DatabaseScreen() }
+        composable(Destination.PAYMENT.route) { PaymentScreen() }
         composable(Destination.ABOUT.route) { AboutScreen() }
     }
 }
@@ -79,7 +79,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             KreditinTheme {
-                // Removed the Scaffold from here, it will be in the AppNavigationBar
                 AppNavigationBar()
             }
         }
