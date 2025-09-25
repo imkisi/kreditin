@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.kreditin.ui.theme.KreditinTheme
 
@@ -91,9 +92,19 @@ fun AppNavigationBar(modifier: Modifier = Modifier) {
     // Set the initial start destination for the navigation bar
     val startDestination = Destination.HOME
     var selectedDestinationIndex by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Determine the current Destination object based on the route
+    val currentScreen = Destination.entries.find { it.route == currentRoute }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        topBar = {
+            if (currentScreen != null) {
+                MyAppTopAppBar(currentDestination = currentScreen)
+            }
+        },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 Destination.entries.forEachIndexed { index, destination ->

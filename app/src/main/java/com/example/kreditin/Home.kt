@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Motorcycle
 import androidx.compose.material.icons.filled.Person
@@ -38,7 +40,7 @@ fun OfficerButton(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 0.dp,
@@ -74,7 +76,7 @@ fun OfficerButton(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "List of names of operating officers",
+                    text = "View and manage all employee information",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -95,7 +97,7 @@ fun VehicleButton(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 0.dp,
@@ -131,7 +133,7 @@ fun VehicleButton(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "List of available motorcycles",
+                    text = "Access details and manage the list of all vehicles",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -152,7 +154,7 @@ fun CreditorButton(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 0.dp,
@@ -188,7 +190,7 @@ fun CreditorButton(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "List of parties who still have outstanding bills",
+                    text = "View information on individuals with outstanding bills",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -201,41 +203,36 @@ fun CreditorButton(
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 24.dp)
+            .verticalScroll(scrollState)
     ) {
-        Text(text = "Kreditin",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 16.dp))
-        Column(
-        ) {
-            OfficerButton(
-                onClick = {
-                    // val intent = Intent(context, OfficerListActivity::class.java)
-                    // context.startActivity(intent)
-                    println("Officer Button Clicked - Navigate to Officer List (TODO)")
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            VehicleButton(
-                onClick = {
-                    // val intent = Intent(context, VehicleListActivity::class.java)
-                    // context.startActivity(intent)
-                    println("Officer Button Clicked - Navigate to Vehicle List (TODO)")
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            CreditorButton(
-                onClick = {
-                    // val intent = Intent(context, CreditorListActivity::class.java)
-                    // context.startActivity(intent)
-                    println("Officer Button Clicked - Navigate to Creditor List (TODO)")
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
+        OfficerButton(
+            onClick = {
+                // val intent = Intent(context, OfficerListActivity::class.java)
+                // context.startActivity(intent)
+                println("Officer Button Clicked - Navigate to Officer List (TODO)")
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        VehicleButton(
+            onClick = {
+                // val intent = Intent(context, VehicleListActivity::class.java)
+                // context.startActivity(intent)
+                println("Officer Button Clicked - Navigate to Vehicle List (TODO)")
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        CreditorButton(
+            onClick = {
+                // val intent = Intent(context, CreditorListActivity::class.java)
+                // context.startActivity(intent)
+                println("Officer Button Clicked - Navigate to Creditor List (TODO)")
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
     }
 }
