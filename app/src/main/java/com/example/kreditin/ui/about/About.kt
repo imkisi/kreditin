@@ -1,4 +1,4 @@
-package com.example.kreditin
+package com.example.kreditin.ui.about
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.kreditin.R
 
 @Composable
 fun AboutScreen() {

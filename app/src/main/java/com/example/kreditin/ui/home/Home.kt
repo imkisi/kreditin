@@ -1,5 +1,6 @@
-package com.example.kreditin // Or your actual package name
+package com.example.kreditin.ui.home // Or your actual package name
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -212,8 +213,8 @@ fun HomeScreen() {
     ) {
         OfficerButton(
             onClick = {
-                // val intent = Intent(context, OfficerListActivity::class.java)
-                // context.startActivity(intent)
+                val intent = Intent(context, StaffData::class.java)
+                context.startActivity(intent)
                 println("Officer Button Clicked - Navigate to Officer List (TODO)")
             },
             modifier = Modifier.padding(bottom = 8.dp)

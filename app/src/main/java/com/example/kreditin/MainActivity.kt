@@ -29,6 +29,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.kreditin.ui.about.AboutScreen
+import com.example.kreditin.ui.components.MyAppTopAppBar
+import com.example.kreditin.ui.home.HomeScreen
+import com.example.kreditin.ui.payment.PaymentScreen
 import com.example.kreditin.ui.theme.KreditinTheme
 
 enum class Destination(
@@ -38,19 +42,19 @@ enum class Destination(
     val contentDescription: String
 ) {
     HOME(
-        route = "home",
+        route = "com/example/kreditin/ui/home",
         icon = Icons.Filled.Home,
         label = "Home",
         contentDescription = "Navigate to Home"
     ),
     PAYMENT(
-        route = "payment",
+        route = "com/example/kreditin/ui/payment",
         icon = Icons.Filled.Payments,
         label = "Payment",
         contentDescription = "Navigate to Payment"
     ),
     ABOUT(
-        route = "about",
+        route = "com/example/kreditin/ui/about",
         icon = Icons.Filled.Pageview,
         label = "About",
         contentDescription = "Navigate to About"
