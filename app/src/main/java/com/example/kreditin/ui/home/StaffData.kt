@@ -62,6 +62,8 @@ fun StaffDataScreen() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* TODO: Handle FAB click, e.g., add new staff */ },
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -84,7 +86,8 @@ fun StaffTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: () -
     MediumTopAppBar(
         title = { Text("Staff Data") },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
