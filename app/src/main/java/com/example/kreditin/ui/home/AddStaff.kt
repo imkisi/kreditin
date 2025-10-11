@@ -52,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +79,6 @@ fun AddStaffScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val context = LocalContext.current
 
     var name by remember { mutableStateOf("") }
     var position by remember { mutableStateOf("") }
@@ -115,7 +113,7 @@ fun AddStaffScreen(
 
                         backPressedDispatcher?.onBackPressed()
                     } else {
-                        // TODO: Show a Toast or Snackbar message for invalid input
+                        // TODO: Show a Toast or Snack bar message for invalid input
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -150,7 +148,7 @@ fun AddStaffScreen(
                     pressedElevation = 0.dp
                 )
             ) {
-                Column() {
+                Column {
                     // Name
                     FormRow(
                         icon = Icons.Default.Person,
@@ -308,7 +306,7 @@ private fun TransparentOutlinedTextField(
 @Composable
 fun AddStaffTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: () -> Unit) {
     MediumTopAppBar(
-        title = { Text("Add Staff Data") },
+        title = { Text("Add Staff") },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             scrolledContainerColor = MaterialTheme.colorScheme.surface
