@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kreditin.ui.data.database.AppDatabase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -37,6 +38,20 @@ class StaffViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             staffDaoFlow.collect { dao ->
                 dao.deleteStaff(staff)
+            }
+        }
+    }
+
+    fun getStaffById(id: Int): Flow<Staff?> {
+        return staffDaoFlow.flatMapLatest { dao ->
+            dao.getStaffById(id)
+        }
+    }
+
+    fun updateStaff(staff: Staff) {
+        viewModelScope.launch {
+            staffDaoFlow.collect { dao ->
+                dao.updateStaff(staff)
             }
         }
     }

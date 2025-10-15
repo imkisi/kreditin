@@ -21,8 +21,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -43,6 +43,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,17 +58,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.kreditin.ui.data.staff.Staff
 import com.example.kreditin.ui.data.staff.StaffViewModel
 import com.example.kreditin.ui.theme.KreditinTheme
 
-class AddStaff : ComponentActivity() {
+const val STAFF_ID = "STAFF_ID"
+
+class EditStaff : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val staffId = intent.getIntExtra(STAFF_ID, -1) // Get staff ID from intent
+
         setContent {
             KreditinTheme {
-                AddStaffScreen()
+                if (staffId != -1) {
+                    EditStaffScreen(staffId = staffId)
+                } else {
+                    Text("Error: Staff ID not found.")
+                }
             }
         }
     }
@@ -74,9 +83,7 @@ class AddStaff : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddStaffScreen(
-    staffViewModel: StaffViewModel = viewModel()
-) {
+fun EditStaffScreen(staffId: Int, staffViewModel: StaffViewModel = viewModel()) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
@@ -86,45 +93,52 @@ fun AddStaffScreen(
     var phone by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
+    val staffState by staffViewModel.getStaffById(staffId).collectAsState(initial = null)
+
+    LaunchedEffect(staffState) {
+        staffState?.let { staff ->
+            name = staff.name
+            position = staff.position
+            email = staff.email
+            phone = staff.phone
+            address = staff.address
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AddStaffTopAppBar(
+            EditStaffTopAppBar(
                 scrollBehavior = scrollBehavior,
-                onNavigateBack = {
-                    backPressedDispatcher?.onBackPressed()
-                }
+                onNavigateBack = { backPressedDispatcher?.onBackPressed() }
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    if (name.isNotBlank() && position.isNotBlank()) {
-                        val staff = Staff(
+                    staffState?.let {
+                        val updatedStaff = it.copy(
                             name = name,
                             position = position,
                             email = email,
                             phone = phone,
                             address = address
                         )
-                        staffViewModel.addStaff(staff)
-
+                        staffViewModel.updateStaff(updatedStaff)
                         backPressedDispatcher?.onBackPressed()
-                    } else {
-                        // TODO: Show a Toast or Snack bar message for invalid input
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Icon"
+                    imageVector = Icons.Default.Done,
+                    contentDescription = "Update Icon"
                 )
                 Text(
-                    text = "Add Staff",
+                    text = "Update",
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -224,10 +238,7 @@ fun AddStaffScreen(
                     )
 
                     // Address
-                    FormRow(
-                        icon = Icons.Default.Business,
-                        iconDescription = "Address Icon"
-                    ) {
+                    FormRow(icon = Icons.Default.Business, iconDescription = "Address Icon") {
                         TransparentOutlinedTextField(
                             value = address,
                             onValueChange = { address = it },
@@ -301,12 +312,11 @@ private fun TransparentOutlinedTextField(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddStaffTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: () -> Unit) {
+fun EditStaffTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: () -> Unit) {
     MediumTopAppBar(
-        title = { Text("Add Staff") },
+        title = { Text("Edit Staff") },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             scrolledContainerColor = MaterialTheme.colorScheme.surface
@@ -325,8 +335,8 @@ fun AddStaffTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: (
 
 @Preview(showBackground = true)
 @Composable
-fun AddStaffDataScreenPreview() {
+fun EditStaffScreenPreview() {
     KreditinTheme {
-        AddStaffScreen()
+        EditStaffScreen(staffId = -1)
     }
 }

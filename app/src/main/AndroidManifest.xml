@@ -13,6 +13,11 @@
         android:theme="@style/Theme.Kreditin"
         tools:targetApi="31">
         <activity
+            android:name=".ui.home.EditStaff"
+            android:exported="false"
+            android:label="@string/title_activity_edit_staff"
+            android:theme="@style/Theme.Kreditin" />
+        <activity
             android:name=".ui.home.AddStaff"
             android:exported="false"
             android:label="@string/title_activity_add_staff"

@@ -47,4 +47,5 @@
     </string>
     <string name="title_activity_staff_data">StaffData</string>
     <string name="title_activity_add_staff">AddStaff</string>
+    <string name="title_activity_edit_staff">EditStaff</string>
 </resources>
