@@ -221,8 +221,8 @@ fun HomeScreen() {
         )
         VehicleButton(
             onClick = {
-                // val intent = Intent(context, VehicleListActivity::class.java)
-                // context.startActivity(intent)
+                val intent = Intent(context, MotorcycleData::class.java)
+                context.startActivity(intent)
                 println("Officer Button Clicked - Navigate to Vehicle List (TODO)")
             },
             modifier = Modifier.padding(bottom = 8.dp)
