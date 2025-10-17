@@ -51,4 +51,7 @@
     <string name="title_activity_motorcycle_data">MotorcycleData</string>
     <string name="title_activity_add_motorcycle">AddMotorcycle</string>
     <string name="title_activity_edit_motorcycle">EditMotorcycle</string>
+    <string name="title_activity_creditor_data">CreditorData</string>
+    <string name="title_activity_add_creditor">AddCreditor</string>
+    <string name="title_activity_edit_creditor">EditCreditor</string>
 </resources>
