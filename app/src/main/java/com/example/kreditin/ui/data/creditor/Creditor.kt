@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class Creditor(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
-    val position: String,
     val email: String,
     val phone: String,
     val address: String

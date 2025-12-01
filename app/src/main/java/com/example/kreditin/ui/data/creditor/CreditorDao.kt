@@ -1,26 +1,27 @@
 package com.example.kreditin.ui.data.creditor
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.kreditin.ui.data.staff.Staff
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface CreditorDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertStaff(staff: Staff)
+    suspend fun insertCreditor(creditor: Creditor)
 
     @Update
-    suspend fun updateStaff(staff: Staff)
+    suspend fun updateCreditor(creditor: Creditor)
 
     @Delete
-    suspend fun deleteStaff(staff: Staff)
+    suspend fun deleteCreditor(creditor: Creditor)
 
-    @Query("SELECT * FROM staff")
-    fun getAllStaff(): Flow<List<Staff>>
+    @Query("SELECT * FROM creditor")
+    fun getAllCreditors(): Flow<List<Creditor>>
 
-    @Query("SELECT * FROM staff WHERE id = :id")
-    fun getStaffById(id: Int): Flow<Staff?>
+    @Query("SELECT * FROM creditor WHERE id = :id")
+    fun getCreditorById(id: Int): Flow<Creditor?>
 }

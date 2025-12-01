@@ -44,6 +44,8 @@ fun AboutScreen() {
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
         Image(
             painter = painterResource(id = R.drawable.example),
             contentDescription = "Profile Picture",
@@ -56,13 +58,13 @@ fun AboutScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Bagas \"KiSI\"",
+            text = "Bagas Dwi Anggoro",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Artist who design and code",
+            text = "1123100125",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
