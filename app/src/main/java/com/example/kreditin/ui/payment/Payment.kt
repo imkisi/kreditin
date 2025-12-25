@@ -1,5 +1,6 @@
 package com.example.kreditin.ui.payment
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -269,8 +270,8 @@ fun PaymentScreen() {
     ) {
         RequestButton(
             onClick = {
-                // val intent = Intent(context, OfficerListActivity::class.java)
-                // context.startActivity(intent)
+                val intent = Intent(context, TransactionReqData::class.java)
+                context.startActivity(intent)
                 println("Officer Button Clicked - Navigate to Officer List (TODO)")
             },
             modifier = Modifier.padding(bottom = 8.dp)

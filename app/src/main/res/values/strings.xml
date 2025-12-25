@@ -54,4 +54,5 @@
     <string name="title_activity_creditor_data">CreditorData</string>
     <string name="title_activity_add_creditor">AddCreditor</string>
     <string name="title_activity_edit_creditor">EditCreditor</string>
+    <string name="title_activity_transaction_req_data">TransactionReqData</string>
 </resources>
