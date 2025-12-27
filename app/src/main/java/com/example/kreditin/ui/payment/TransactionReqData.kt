@@ -312,13 +312,23 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
-
-                    HorizontalDivider(
-                        thickness = 4.dp,
-                        color = colorScheme.surface
-                    )
-
+                }
+            }
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = colorScheme.surfaceContainerLow
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp
+                )
+            ) {
+                Column {
                     TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(loanPrincipal),
                         onValueChange = {},
                         label = { Text("Loan Principal") },
@@ -332,6 +342,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     )
 
                     TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(totalLoanAmount),
                         onValueChange = {},
                         label = { Text("Total Loan Amount") },
@@ -345,6 +356,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     )
 
                     TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(monthlyPayment),
                         onValueChange = {},
                         label = { Text("Monthly Payment") },
