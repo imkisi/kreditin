@@ -338,27 +338,39 @@ fun generateReceiptPdf(context: Context, transaction: Transaction) {
     val paint = Paint()
     val rupiahFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
 
+
+    val dateFormat = java.text.SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
+    val dateString = dateFormat.format(java.util.Date(transaction.timestamp))
+
+
+    val invoiceNumber = "INV/${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)}/${transaction.id.toString().padStart(3, '0')}"
+
     var yPos = 60f
     val xPos = 50f
 
-    // Judul
+
     paint.textSize = 20f
     paint.isFakeBoldText = true
     canvas.drawText("KREDITIN RECEIPT", xPos, yPos, paint)
 
-    // Garis Pemisah
-    yPos += 20f
+    paint.textSize = 12f
     paint.isFakeBoldText = false
+    paint.color = android.graphics.Color.GRAY
+    yPos += 20f
+    canvas.drawText("Invoice NO: $invoiceNumber", xPos, yPos, paint)
+    canvas.drawText("Date: $dateString", 400f, yPos, paint)
+
+
+    paint.color = android.graphics.Color.BLACK
+    yPos += 15f
     canvas.drawLine(xPos, yPos, 545f, yPos, paint)
 
-    // Konten
+
     paint.textSize = 14f
     yPos += 40f
     canvas.drawText("Customer: ${transaction.creditorName}", xPos, yPos, paint)
     yPos += 25f
     canvas.drawText("Phone: ${transaction.creditorPhone}", xPos, yPos, paint)
-    yPos += 25f
-    canvas.drawText("Address: ${transaction.creditorAddress}", xPos, yPos, paint)
 
     yPos += 40f
     paint.isFakeBoldText = true
@@ -367,10 +379,11 @@ fun generateReceiptPdf(context: Context, transaction: Transaction) {
     yPos += 25f
     canvas.drawText("Price: ${rupiahFormat.format(transaction.motorcyclePrice)}", xPos, yPos, paint)
 
+
     yPos += 40f
     canvas.drawText("Down Payment: ${rupiahFormat.format(transaction.downPayment)}", xPos, yPos, paint)
     yPos += 25f
-    canvas.drawText("Tenure: ${transaction.tenure} Months", xPos, yPos, paint)
+    canvas.drawText("Tenure: ${transaction.tenure} Bulan", xPos, yPos, paint)
     yPos += 25f
     canvas.drawText("Interest Rate: ${transaction.interestRate}%", xPos, yPos, paint)
 
@@ -378,20 +391,33 @@ fun generateReceiptPdf(context: Context, transaction: Transaction) {
     paint.isFakeBoldText = true
     canvas.drawText("Monthly Installment: ${rupiahFormat.format(transaction.monthlyPayment)}", xPos, yPos, paint)
 
+
+    paint.isFakeBoldText = false
+    paint.textSize = 11f
+    yPos += 100f
+    canvas.drawText("Statement:", xPos, yPos, paint)
+    yPos += 20f
+    paint.typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.ITALIC)
+    canvas.drawText("\"Declare that the above information is ture and valid\"", xPos, yPos, paint)
+
+    paint.typeface = android.graphics.Typeface.DEFAULT
+
+    yPos += 60f
+    paint.typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.ITALIC)
+    canvas.drawText("Sincerely,", 400f, yPos, paint)
+    yPos += 50f
+    canvas.drawText("( ________________ )", 400f, yPos, paint)
+
     pdfDocument.finishPage(page)
 
-    // Simpan ke direktori Download aplikasi
-    val file = File(
-        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-        "Receipt_${transaction.id}.pdf"
-    )
+    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Invoice_${transaction.id}.pdf")
 
     try {
         pdfDocument.writeTo(FileOutputStream(file))
-        Toast.makeText(context, "PDF saved to Downloads", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "PDF Sucessfull Generated", Toast.LENGTH_SHORT).show()
     } catch (e: IOException) {
         e.printStackTrace()
-        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Failed to print PDF", Toast.LENGTH_SHORT).show()
     }
     pdfDocument.close()
 }
