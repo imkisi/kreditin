@@ -1,11 +1,16 @@
 package com.example.kreditin.ui.payment
 
+import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -383,7 +388,7 @@ fun generateReceiptPdf(context: Context, transaction: Transaction) {
     yPos += 40f
     canvas.drawText("Down Payment: ${rupiahFormat.format(transaction.downPayment)}", xPos, yPos, paint)
     yPos += 25f
-    canvas.drawText("Tenure: ${transaction.tenure} Bulan", xPos, yPos, paint)
+    canvas.drawText("Tenure: ${transaction.tenure} Months", xPos, yPos, paint)
     yPos += 25f
     canvas.drawText("Interest Rate: ${transaction.interestRate}%", xPos, yPos, paint)
 
@@ -410,14 +415,52 @@ fun generateReceiptPdf(context: Context, transaction: Transaction) {
 
     pdfDocument.finishPage(page)
 
-    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Invoice_${transaction.id}.pdf")
+    val fileName = "Invoice_${transaction.id}_${System.currentTimeMillis()}.pdf"
 
     try {
-        pdfDocument.writeTo(FileOutputStream(file))
-        Toast.makeText(context, "PDF Sucessfull Generated", Toast.LENGTH_SHORT).show()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // API 29 Up
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            }
+
+            val resolver = context.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+            if (uri != null) {
+                resolver.openOutputStream(uri).use { outputStream ->
+                    if (outputStream != null) {
+                        pdfDocument.writeTo(outputStream)
+                        Toast.makeText(context, "PDF created in Download", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        } else {
+            // API Under 28
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File(downloadsDir, fileName)
+            pdfDocument.writeTo(FileOutputStream(file))
+            Toast.makeText(context, "PDF created in: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        }
     } catch (e: IOException) {
         e.printStackTrace()
-        Toast.makeText(context, "Failed to print PDF", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Gagal menyimpan PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+    } finally {
+        pdfDocument.close()
     }
-    pdfDocument.close()
+}
+
+private fun openPdfIntent(context: Context, uri: Uri) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "application/pdf")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    try {
+        context.startActivity(Intent.createChooser(intent, "Buka PDF dengan..."))
+    } catch (e: Exception) {
+        Toast.makeText(context, "Tidak ada aplikasi PDF viewer", Toast.LENGTH_SHORT).show()
+    }
 }
