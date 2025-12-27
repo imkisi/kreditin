@@ -278,8 +278,8 @@ fun PaymentScreen() {
         )
         InstallmentButton(
             onClick = {
-                val intent = Intent(context, InstallmentReceipt::class.java)
-                context.startActivity(intent)
+                // val intent = Intent(context, InstallmentReceipt::class.java)
+                // context.startActivity(intent)
                 println("Officer Button Clicked - Navigate to Vehicle List (TODO)")
             },
             modifier = Modifier.padding(bottom = 8.dp)

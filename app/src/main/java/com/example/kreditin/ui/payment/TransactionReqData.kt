@@ -1,5 +1,6 @@
 package com.example.kreditin.ui.payment
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -48,6 +49,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kreditin.ui.data.creditor.Creditor
 import com.example.kreditin.ui.data.database.AppDatabase
@@ -84,10 +85,8 @@ class TransactionViewModel(private val database: AppDatabase) : ViewModel() {
     val allCreditors: Flow<List<Creditor>> = database.creditorDao().getAllCreditors()
     val allMotorcycles: Flow<List<Motorcycle>> = database.motorcycleDao().getAllMotorcycles()
 
-    fun saveTransaction(transaction: Transaction) {
-        viewModelScope.launch {
-            database.transactionDao().insertTransaction(transaction)
-        }
+    suspend fun saveTransaction(transaction: Transaction): Long {
+        return database.transactionDao().insertTransaction(transaction)
     }
 }
 
@@ -113,6 +112,7 @@ class TransactionReqData : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>, viewModel: TransactionViewModel) {
+    val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     var showCreditorSheet by remember { mutableStateOf(false) }
@@ -172,8 +172,16 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                             monthlyPayment = monthlyPayment.toDouble()
                         )
 
-                        viewModel.saveTransaction(transactionRecord)
-                        backPressedDispatcher?.onBackPressed()
+                        scope.launch {
+                            val newId = viewModel.saveTransaction(transactionRecord)
+
+                            val intent = Intent(context, InstallmentReceipt::class.java).apply {
+                                putExtra("TRANSACTION_ID", newId.toInt())
+                            }
+                            context.startActivity(intent)
+
+                            (context as? android.app.Activity)?.finish()
+                        }
 
                     } else {
                         Toast.makeText(context, "Please complete the form first", Toast.LENGTH_SHORT).show()
