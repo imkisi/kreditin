@@ -13,13 +13,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContactPhone
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,8 +48,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -53,6 +62,8 @@ import com.example.kreditin.ui.data.database.AppDatabase
 import com.example.kreditin.ui.data.motorcycle.Motorcycle
 import com.example.kreditin.ui.theme.KreditinTheme
 import kotlinx.coroutines.flow.Flow
+import java.text.NumberFormat
+import java.util.Locale
 
 class TransactionViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -100,6 +111,23 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
     val creditorSheetState = rememberModalBottomSheetState()
     val motorcycleSheetState = rememberModalBottomSheetState()
 
+    var downPayment by remember { mutableStateOf("") }
+    var interestRate by remember { mutableStateOf("") }
+    var tenure by remember { mutableStateOf("") }
+
+    val dp = downPayment.toFloatOrNull() ?: 0f
+    val ir = interestRate.toFloatOrNull() ?: 0f
+    val tenorMonths = tenure.toIntOrNull() ?: 0
+
+    val motorcyclePrice = selectedMotorcycle?.price ?: 0
+    val loanPrincipal = if (motorcyclePrice > 0) motorcyclePrice - dp else 0f
+
+    val totalInterest = loanPrincipal * (ir / 100) * (tenorMonths / 12f)
+    val totalLoanAmount = if (loanPrincipal > 0) loanPrincipal + totalInterest else 0f
+    val monthlyPayment = if (tenorMonths > 0) totalLoanAmount / tenorMonths else 0f
+
+    val rupiahFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -111,12 +139,22 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     backPressedDispatcher?.onBackPressed()
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* TODO: Implement save transaction logic */ },
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            ) {
+                Icon(Icons.Filled.Save, contentDescription = "Save Transaction")
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -180,12 +218,114 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                         Text(text = "Motorcycle Detail:", style = MaterialTheme.typography.labelLarge)
                         Text(text = "Year: ${motorcycle.year}")
                         Text(text = "Color: ${motorcycle.color}")
-                        Text(text = "Price: ${motorcycle.price}")
+                        Text(text = "Price: ${rupiahFormat.format(motorcycle.price)}")
                     }
                 }
             }
 
-            //TODO
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp
+                )
+            ) { 
+                Column {
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = downPayment,
+                        onValueChange = { downPayment = it },
+                        label = { Text("Down Payment") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    HorizontalDivider(
+                        thickness = 4.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    )
+
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = interestRate,
+                        onValueChange = { interestRate = it },
+                        label = { Text("Interest Rate (%)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    HorizontalDivider(
+                        thickness = 4.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    )
+
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = tenure,
+                        onValueChange = { tenure = it },
+                        label = { Text("Tenure (Months)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+            }
+
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp
+                )
+            ) {
+                Column {
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = rupiahFormat.format(loanPrincipal),
+                        onValueChange = {},
+                        label = { Text("Loan Principal") },
+                        singleLine = true,
+                        readOnly = true
+                    )
+
+                    HorizontalDivider(
+                        thickness = 4.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    )
+
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = rupiahFormat.format(totalLoanAmount),
+                        onValueChange = {},
+                        label = { Text("Total Loan Amount") },
+                        singleLine = true,
+                        readOnly = true
+                    )
+
+                    HorizontalDivider(
+                        thickness = 4.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    )
+
+                    TransparentOutlinedTextField(
+                        modifier = Modifier.padding(top = 8.dp),
+                        value = rupiahFormat.format(monthlyPayment),
+                        onValueChange = {},
+                        label = { Text("Monthly Payment") },
+                        singleLine = true,
+                        readOnly = true
+                    )
+                }
+            }
         }
 
         if (showCreditorSheet) {
@@ -241,7 +381,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                             ListItem(
                                 headlineContent = { Text(motorcycle.model) },
                                 supportingContent = { Text("${motorcycle.year} - ${motorcycle.color}") },
-                                trailingContent = { Text("${motorcycle.price}") },
+                                trailingContent = { Text(rupiahFormat.format(motorcycle.price)) },
                                 modifier = Modifier.clickable {
                                     selectedMotorcycle = motorcycle
                                     showMotorcycleSheet = false
@@ -274,6 +414,37 @@ fun TransactionTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack
             }
         },
         scrollBehavior = scrollBehavior
+    )
+}
+
+@Composable
+private fun TransparentOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: @Composable (() -> Unit)? = null,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    readOnly: Boolean = false
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        modifier = modifier.fillMaxWidth(),
+        singleLine = singleLine,
+        maxLines = maxLines,
+        readOnly = readOnly,
+        keyboardOptions = keyboardOptions,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = Color.Transparent,
+            disabledBorderColor = Color.Transparent,
+            errorBorderColor = Color.Transparent,
+            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     )
 }
 
