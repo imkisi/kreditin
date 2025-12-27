@@ -10,12 +10,16 @@ import com.example.kreditin.ui.data.motorcycle.Motorcycle
 import com.example.kreditin.ui.data.motorcycle.MotorcycleDao
 import com.example.kreditin.ui.data.staff.Staff
 import com.example.kreditin.ui.data.staff.StaffDao
+import com.example.kreditin.ui.data.transaction.Transaction
+import com.example.kreditin.ui.data.transaction.TransactionDao
 
-@Database(entities = [Motorcycle::class, Staff::class, Creditor::class], version = 2, exportSchema = false)
+@Database(entities = [Motorcycle::class, Staff::class, Creditor::class, Transaction::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun motorcycleDao(): MotorcycleDao
     abstract fun staffDao(): StaffDao
     abstract fun creditorDao(): CreditorDao
+    abstract fun transactionDao(): TransactionDao
+
 
     companion object {
         @Volatile

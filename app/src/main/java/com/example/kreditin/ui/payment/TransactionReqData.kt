@@ -1,6 +1,7 @@
 package com.example.kreditin.ui.payment
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
@@ -26,12 +27,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -56,12 +58,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kreditin.ui.data.creditor.Creditor
 import com.example.kreditin.ui.data.database.AppDatabase
 import com.example.kreditin.ui.data.motorcycle.Motorcycle
+import com.example.kreditin.ui.data.transaction.Transaction
 import com.example.kreditin.ui.theme.KreditinTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -78,6 +83,12 @@ class TransactionViewModelFactory(private val database: AppDatabase) : ViewModel
 class TransactionViewModel(private val database: AppDatabase) : ViewModel() {
     val allCreditors: Flow<List<Creditor>> = database.creditorDao().getAllCreditors()
     val allMotorcycles: Flow<List<Motorcycle>> = database.motorcycleDao().getAllMotorcycles()
+
+    fun saveTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            database.transactionDao().insertTransaction(transaction)
+        }
+    }
 }
 
 class TransactionReqData : ComponentActivity() {
@@ -93,7 +104,7 @@ class TransactionReqData : ComponentActivity() {
                 )
                 val creditors by viewModel.allCreditors.collectAsState(initial = emptyList())
                 val motorcycles by viewModel.allMotorcycles.collectAsState(initial = emptyList())
-                UserSelectionScreen(creditors = creditors, motorcycles = motorcycles)
+                UserSelectionScreen(creditors = creditors, motorcycles = motorcycles, viewModel = viewModel)
             }
         }
     }
@@ -101,7 +112,7 @@ class TransactionReqData : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>) {
+fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>, viewModel: TransactionViewModel) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     var showCreditorSheet by remember { mutableStateOf(false) }
@@ -141,12 +152,41 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* TODO: Implement save transaction logic */ },
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            val context = LocalContext.current
+
+            ExtendedFloatingActionButton(
+                onClick = {
+                    if (selectedCreditor != null && selectedMotorcycle != null && downPayment.isNotEmpty()) {
+
+                        val transactionRecord = Transaction(
+                            creditorName = selectedCreditor!!.name,
+                            creditorAddress = selectedCreditor!!.address,
+                            creditorPhone = selectedCreditor!!.phone,
+                            motorcycleName = selectedMotorcycle!!.model,
+                            motorcyclePrice = selectedMotorcycle!!.price.toDouble(),
+                            downPayment = dp.toDouble(),
+                            interestRate = ir.toDouble(),
+                            tenure = tenorMonths,
+                            loanPrincipal = loanPrincipal.toDouble(),
+                            totalLoanAmount = totalLoanAmount.toDouble(),
+                            monthlyPayment = monthlyPayment.toDouble()
+                        )
+
+                        viewModel.saveTransaction(transactionRecord)
+                        backPressedDispatcher?.onBackPressed()
+
+                    } else {
+                        Toast.makeText(context, "Please complete the form first", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                containerColor = colorScheme.tertiaryContainer,
+                contentColor = colorScheme.onTertiaryContainer
             ) {
                 Icon(Icons.Filled.Save, contentDescription = "Save Transaction")
+                Text(
+                    text = "Save",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
     ) { innerPadding ->
@@ -161,7 +201,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
             OutlinedTextField(
                 value = selectedCreditor?.name ?: "",
                 onValueChange = {},
-                label = { Text("Select Creditor") },
+                label = { Text("Creditor") },
                 placeholder = { Text("Tap to select...") },
                 readOnly = true,
                 modifier = Modifier
@@ -169,10 +209,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     .clickable { showCreditorSheet = true },
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    disabledTextColor = colorScheme.onSurface,
+                    disabledBorderColor = colorScheme.outline,
+                    disabledLabelColor = colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = colorScheme.onSurfaceVariant
                 ),
                 leadingIcon = { Icon(Icons.Default.ContactPhone, contentDescription = null) }
             )
@@ -180,10 +220,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
             selectedCreditor?.let { user ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Creditor Detail:", style = MaterialTheme.typography.labelLarge)
+                        Text(text = "Creditor Detail:", style = typography.labelLarge)
                         Text(text = "Address: ${user.address}")
                         Text(text = "Phone: ${user.phone}")
                     }
@@ -193,7 +233,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
             OutlinedTextField(
                 value = selectedMotorcycle?.model ?: "",
                 onValueChange = {},
-                label = { Text("Select Motorcycle List") },
+                label = { Text("Motorcycle") },
                 placeholder = { Text("Tap to select...") },
                 readOnly = true,
                 modifier = Modifier
@@ -201,10 +241,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     .clickable { showMotorcycleSheet = true },
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    disabledTextColor = colorScheme.onSurface,
+                    disabledBorderColor = colorScheme.outline,
+                    disabledLabelColor = colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = colorScheme.onSurfaceVariant
                 ),
                 leadingIcon = { Icon(Icons.Default.TwoWheeler, contentDescription = null) }
             )
@@ -212,10 +252,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
             selectedMotorcycle?.let { motorcycle ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Motorcycle Detail:", style = MaterialTheme.typography.labelLarge)
+                        Text(text = "Motorcycle Detail:", style = typography.labelLarge)
                         Text(text = "Year: ${motorcycle.year}")
                         Text(text = "Color: ${motorcycle.color}")
                         Text(text = "Price: ${rupiahFormat.format(motorcycle.price)}")
@@ -228,7 +268,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    containerColor = colorScheme.surfaceContainerLow
                 ),
                 elevation = CardDefaults.elevatedCardElevation(
                     defaultElevation = 0.dp,
@@ -247,7 +287,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
 
                     HorizontalDivider(
                         thickness = 4.dp,
-                        color = MaterialTheme.colorScheme.surface
+                        color = colorScheme.surface
                     )
 
                     TransparentOutlinedTextField(
@@ -261,7 +301,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
 
                     HorizontalDivider(
                         thickness = 4.dp,
-                        color = MaterialTheme.colorScheme.surface
+                        color = colorScheme.surface
                     )
 
                     TransparentOutlinedTextField(
@@ -272,24 +312,13 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
-                }
-            }
 
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                ),
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 0.dp
-                )
-            ) {
-                Column {
+                    HorizontalDivider(
+                        thickness = 4.dp,
+                        color = colorScheme.surface
+                    )
+
                     TransparentOutlinedTextField(
-                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(loanPrincipal),
                         onValueChange = {},
                         label = { Text("Loan Principal") },
@@ -299,11 +328,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
 
                     HorizontalDivider(
                         thickness = 4.dp,
-                        color = MaterialTheme.colorScheme.surface
+                        color = colorScheme.surface
                     )
 
                     TransparentOutlinedTextField(
-                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(totalLoanAmount),
                         onValueChange = {},
                         label = { Text("Total Loan Amount") },
@@ -313,11 +341,10 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
 
                     HorizontalDivider(
                         thickness = 4.dp,
-                        color = MaterialTheme.colorScheme.surface
+                        color = colorScheme.surface
                     )
 
                     TransparentOutlinedTextField(
-                        modifier = Modifier.padding(top = 8.dp),
                         value = rupiahFormat.format(monthlyPayment),
                         onValueChange = {},
                         label = { Text("Monthly Payment") },
@@ -338,7 +365,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     .padding(bottom = 32.dp)) {
                     Text(
                         text = "Select Creditor",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = typography.titleLarge,
                         modifier = Modifier.padding(16.dp)
                     )
                     LazyColumn(
@@ -371,7 +398,7 @@ fun UserSelectionScreen(creditors: List<Creditor>, motorcycles: List<Motorcycle>
                     .padding(bottom = 32.dp)) {
                     Text(
                         text = "Select Motorcycle List",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = typography.titleLarge,
                         modifier = Modifier.padding(16.dp)
                     )
                     LazyColumn(
@@ -402,8 +429,8 @@ fun TransactionTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack
     MediumTopAppBar(
         title = { Text("Transaction Request") },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surface
+            containerColor = colorScheme.surface,
+            scrolledContainerColor = colorScheme.surface
         ),
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
@@ -442,8 +469,8 @@ private fun TransparentOutlinedTextField(
             focusedBorderColor = Color.Transparent,
             disabledBorderColor = Color.Transparent,
             errorBorderColor = Color.Transparent,
-            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+            focusedLabelColor = colorScheme.onSurfaceVariant,
+            unfocusedLabelColor = colorScheme.onSurfaceVariant
         )
     )
 }
@@ -460,6 +487,6 @@ fun UserSelectionScreenPreview() {
             Motorcycle(id = 1, model = "Honda Beat", year = 2021, color = "Black", price = 17000000),
             Motorcycle(id = 2, model = "Yamaha NMAX", year = 2022, color = "Red", price = 35000000)
         )
-        UserSelectionScreen(creditors = creditors, motorcycles = motorcycles)
+        UserSelectionScreen(creditors = creditors, motorcycles = motorcycles, viewModel = viewModel())
     }
 }
