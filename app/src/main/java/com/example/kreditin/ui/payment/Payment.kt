@@ -286,8 +286,8 @@ fun PaymentScreen() {
         )
         CreditDataButton(
             onClick = {
-                // val intent = Intent(context, CreditorListActivity::class.java)
-                // context.startActivity(intent)
+                val intent = Intent(context, TransactionData::class.java)
+                context.startActivity(intent)
                 println("Officer Button Clicked - Navigate to Creditor List (TODO)")
             },
             modifier = Modifier.padding(bottom = 8.dp)

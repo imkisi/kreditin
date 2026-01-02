@@ -13,9 +13,19 @@
         android:theme="@style/Theme.Kreditin"
         tools:targetApi="31">
         <activity
+            android:name=".ui.payment.MainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.Kreditin" />
+        <activity
             android:name=".ui.payment.InstallmentReceipt"
             android:exported="false"
             android:label="@string/title_activity_installment_receipt"
+            android:theme="@style/Theme.Kreditin" />
+        <activity
+            android:name=".ui.payment.TransactionData"
+            android:exported="false"
+            android:label="TransactionData"
             android:theme="@style/Theme.Kreditin" />
         <activity
             android:name=".ui.payment.TransactionReqData"
